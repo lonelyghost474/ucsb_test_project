@@ -158,26 +158,26 @@ class Service(Logger):
         title = lambda name: f"|{name:^120}|\n"  # PEP8 violation: E731
         text = lambda name: f"|{name:<120}|\n"  # PEP8 violation: E731
         final_list = [line, title("SWITCH OUT DATA"), line, title("Switch software and hardware version:"), line]
-        # Добавление версии коммутатора
+        # Add switch version
         self.__add_row(data=self.data["sw_version"], func=text, input_list=final_list)
-        # Добавление стартовой конфигурации
+        # Adding a start configuration
         final_list.extend([line, title("Contents of startup configuration:"), line])
         self.__add_row(data=self.data["sw_config"]["start_config"], func=text, input_list=final_list)
-        # Добавление текущей конфигурации
+        # Add current configuration
         final_list.extend([line, title("Current operating configuration:"), line])
         self.__add_row(data=self.data["sw_config"]["running_config"], func=text, input_list=final_list)
-        # Добавление ACL
+        # Add ACL
         final_list.extend([line, title("List access lists:"), line])
         self.__add_row(data=self.data["sw_acl"], func=text, input_list=final_list)
-        # Добавление IP information
+        # Add IP information
         final_list.extend([line, title("IP interface status and configuration:"), line])
         self.__add_row(data=self.data["sw_ip_interface"], func=text, input_list=final_list)
-        # Добавление Interface status and configuration
+        # Add Interface status and configuration
         final_list.extend([line, title("Interface status and configuration:"), line])
         self.__add_row(data=self.data["sw_interface"], func=text, input_list=final_list)
-        # Добавление закрытия таблицы
+        # Adding a table closure
         final_list.extend([line, title("Thanks for the interesting challenge!"), line.strip()])
-        # Печать всех данных
+        # Print all data
         self.add_log.info("\n" + "".join(final_list))
 
     @staticmethod
