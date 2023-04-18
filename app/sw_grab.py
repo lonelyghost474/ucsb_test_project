@@ -1,10 +1,12 @@
 import re
 import os
 import argparse
-from logger import Logger
+from logging import getLogger
 from models import *
 from typing import Optional, Union, NoReturn
 from netmiko import ConnectHandler, NetmikoTimeoutException, NetmikoAuthenticationException, ReadTimeout
+from pydantic.error_wrappers import ValidationError
+from logger import Logger
 
 
 class Service(Logger):
@@ -41,10 +43,11 @@ class Service(Logger):
         super().__init__(name='sw_grab')
         self.session: Union[ConnectHandler, None] = None
         self.data: dict = AllData().dict()
-        self.connect_opt: dict = self.__parse_options(options=Options().dict())
+        self.connect_opt: Union[dict[str: Any], None] = self.__parse_options(options=Options().dict(),
+                                                                             log_func=self.add_log)
 
     @staticmethod
-    def __parse_options(options: dict) -> dict[str: Any]:
+    def __parse_options(options: dict[str: Any], log_func: getLogger) -> dict[str: Any]:
         """
         A method that parses command line arguments and passes them to the data model for connecting to the switch.
 
@@ -64,6 +67,12 @@ class Service(Logger):
         for _, key in enumerate(list((args := vars(parser.parse_args())))):
             if args[key] is not None:
                 options[key] = args[key]
+        # Input Validation
+        try:
+            options = Options(**options).dict()
+        except ValidationError as error:
+            log_func.error(error)
+            return None
         # Removing fields with value None
         for _, key in enumerate(list(options.keys())):
             if options[key] is None:
@@ -217,6 +226,9 @@ class Service(Logger):
         # Commands to execute
         commands = ["show version", "show startup-config", "show running-config", "show access-lists",
                     "show ip interface brief", "show interfaces"]
+        # Checking for Successful Input Validation
+        if not self.connect_opt:
+            return
         # Connecting to the switch
         self.add_log.info("Initialized connection to the switch ...")
         if not self.__connection(options=self.connect_opt):
