@@ -70,6 +70,11 @@ class Service(Logger):
         # Input Validation
         try:
             options = Options(**options).dict()
+            # IPvAnyAddress to str type
+            if options.get("host"):
+                options["host"] = str(options["host"])
+            if options.get("ip"):
+                options["ip"] = str(options["ip"])
         except ValidationError as error:
             log_func.error(error)
             return None
